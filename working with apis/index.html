@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <img src="#">
+  <button id="newCat">New Cat</button>
+  <script>
+     const img = document.querySelector('img');
+     const btn = document.querySelector('#newCat')
+     
+    function fetchCat(){
+      fetch('https://api.giphy.com/v1/gifs/translate?api_key=I9mM8ZAmnNac7YU4p5jLGA72tW5QNEKF&s=cats')
+      .then(function(response) {
+      return response.json();
+      })
+     .then(function(response) {
+        img.src = response.data.images.original.url;
+      });
+    }
+     fetchCat();
+     btn.addEventListener('click',fetchCat)
+  </script>
+</body>
+</html>
