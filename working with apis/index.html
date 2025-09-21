@@ -6,22 +6,56 @@
 </head>
 <body>
   <img src="#">
-  <button id="newCat">New Cat</button>
+  <button id="newCat">New GIF</button>
+  <input type="text" id="searchInput" placeholder="Search for gifs...">
+  <button id="searchBtn">Search</button>
+  <p id="error" style="color:red;"></p>
   <script>
-     const img = document.querySelector('img');
-     const btn = document.querySelector('#newCat')
+    const img = document.querySelector('img');
+    const btn = document.querySelector('#newCat');
+    const searchInput = document.querySelector('#searchInput');
+    const searchBtn = document.querySelector('#searchBtn');
+    const errorMsg = document.querySelector('#error'); // ✅ FIX: now this exists in the HTML
      
-    function fetchCat(){
-      fetch('https://api.giphy.com/v1/gifs/translate?api_key=I9mM8ZAmnNac7YU4p5jLGA72tW5QNEKF&s=cats')
-      .then(function(response) {
-      return response.json();
-      })
-     .then(function(response) {
-        img.src = response.data.images.original.url;
-      });
+    let lastQuery = "cats"; // default search
+
+    function fetchGif(query) {
+      fetch(`https://api.giphy.com/v1/gifs/translate?api_key=I9mM8ZAmnNac7YU4p5jLGA72tW5QNEKF&s=${encodeURIComponent(query)}`, {mode: 'cors'})
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(response => {
+          if (!response.data || !response.data.images) {
+            throw new Error("No GIF found for this search.");
+          }
+          img.src = response.data.images.original.url;
+          errorMsg.textContent = ""; // clear error
+          lastQuery = query; // ✅ FIX: update lastQuery after a successful search
+        })
+        .catch(err => {
+          errorMsg.textContent = "Error: " + err.message;
+          img.src = "#"; // clear image if error
+        });
     }
-     fetchCat();
-     btn.addEventListener('click',fetchCat)
+
+    // default cat when page loads
+    fetchGif(lastQuery);
+
+    // search button
+    searchBtn.addEventListener('click', () => {
+      const query = searchInput.value.trim();
+      if (query) {
+        fetchGif(query);
+      } else {
+        errorMsg.textContent = "Please enter a search term.";
+      }
+    });
+
+    // new gif button - repeats last search
+    btn.addEventListener('click', () => fetchGif(lastQuery));
   </script>
 </body>
 </html>
